@@ -1,0 +1,13 @@
+{
+  "name": "iomt-gateway-firmware-config",
+  "description": "A script for configuring and building custom firmware images for Raspberry Pi gateways.",
+  "authors": "Evan Simkowitz <esimkowitz@wustl.edu>",
+  "version": "0.1.0",
+  "main": "src/index.js",
+  "dependencies": {
+    "aws-sdk": "^2.124.0"
+  },
+  "scripts": {
+    "start": "node src/index.js"
+  }
+}
