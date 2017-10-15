@@ -13,5 +13,5 @@ This repository contains a few basic components:
 
 ## TODO
 
-[ ] Finish this readme :)
-[ ] Finish the registration stack
+* [ ] Finish this readme :)
+* [ ] Finish the registration stack
