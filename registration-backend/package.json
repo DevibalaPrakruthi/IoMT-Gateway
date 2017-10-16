@@ -1,0 +1,10 @@
+{
+  "name": "iomt-gateway-registration-backend",
+  "description": "The backend Lambda functions for the IoMT gateway registration solution",
+  "authors": "Evan Simkowitz <esimkowitz@wustl.edu>",
+  "version": "0.1.0",
+  "main": "src/index.js",
+  "dependencies": {
+    "aws-sdk": "^2.124.0"
+  }
+}

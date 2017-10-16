@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>IoMT Thing Activation</title>
+    <link rel="stylesheet" href="css/form.css">
+</head>
+
+<body>
+    <form action="#">
+
+        <header>
+            <h2>IoMT Thing Activation</h2>
+            <div>Fill out the form below with your email, as well as the serial number, client ID, and activation code included
+                with the device you are activating.</div>
+            <br>
+            <div>When you are finished filling out the form, click submit. You will recieve an email with a link to finish activating
+                your device.</div>
+        </header>
+
+        <div>
+            <label class="desc" id="title1" for="Field1">
+                Email
+            </label>
+            <div>
+                <input id="Field1" name="Field1" type="email" spellcheck="false" value="" maxlength="255" tabindex="3">
+            </div>
+        </div>
+
+        <div>
+            <label class="desc" id="title2" for="Field2">Client ID</label>
+            <div>
+                <input id="Field2" name="Field2" type="text" class="field text fn" value="" size="8" tabindex="1">
+            </div>
+        </div>
+
+        <div>
+            <label class="desc" id="title3" for="Field3">Serial Number</label>
+            <div>
+                <input id="Field3" name="Field3" type="text" class="field text fn" value="SN-" size="8" tabindex="1">
+            </div>
+        </div>
+
+        <div>
+            <label class="desc" id="title4" for="Field4">Activation Code</label>
+            <div>
+                <input id="Field4" name="Field4" type="text" class="field text fn" value="AC-" size="8" tabindex="1">
+            </div>
+        </div>
+
+        <div>
+            <div>
+                <input id="saveForm" name="saveForm" type="submit" value="Submit">
+            </div>
+        </div>
+
+    </form>
+
+</body>
+
+</html>

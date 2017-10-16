@@ -15,3 +15,4 @@ This repository contains a few basic components:
 
 * [ ] Finish this readme :)
 * [ ] Finish the registration stack
+* [ ] Integrate with the scripts to build the Raspbian images

@@ -1,0 +1,13 @@
+{
+    "serialNumber": "SN-6DA2732638AB",
+    "clientId": "Not registered yet",
+    "activationCode": "AC-246B8AEBB21C2E56FBFE",
+    "activated": "false",    
+    "certificateId": "844ae2d4861c1db15079aeb53ba6ca52d6cd996b4a8fb388cae19b3fb66fc16f",
+    "endpoint": "a1b2c3d4e5f6.iot.us-east-2.amazonaws.com",
+    "thingName": "IoMT_Gateway_1",
+    "thingNumber": 1,
+    "type": "Gateway",
+    "team": "IoMT",
+    "study": "fall-study"
+}
