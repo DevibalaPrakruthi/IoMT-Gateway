@@ -2,7 +2,7 @@ console.log('Loading function');
 const constants = require('./constants');
 const AWS = require('aws-sdk');
 const dynamo = new AWS.DynamoDB.DocumentClient();
-const table = constants.gatewayRegistryTableName;
+const table = constants.registryTableName;
 
 exports.handler = function (event, context) {
     //console.log('Received event:', JSON.stringify(event, null, 2));

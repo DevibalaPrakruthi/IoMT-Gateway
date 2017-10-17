@@ -26,22 +26,23 @@ let dynamodb = new AWS.DynamoDB.DocumentClient({
 });
 
 const topic = constants.registrationTopic;
-const type = constants.gatewayThingType;
+const type = constants.type;
 const gateway_files_dir = path.join(__dirname, 'gateway');
-const credentials_dir = "credentials";
-const gateway_credentials_dir = path.join(gateway_files_dir, credentials_dir)
-const iot_sdk_credentials_dir = path.join(__dirname, credentials_dir, "aws-iot-sdk");
+const gateway_credentials_dir = path.join(gateway_files_dir, 'credentials')
+const iot_sdk_credentials_dir = path.join(__dirname, 'credentials', "aws-iot-sdk");
 const iot_sdk_credentials_filename = 'credentials.json';
 const private_key_filename = 'privateKey.pem.key';
 const public_key_filename = 'publicKey.pem.key';
 const certificate_filename = 'certificate.pem.crt';
 const root_ca_filename = 'VeriSign-Class 3-Public-Primary-Certification-Authority-G5.pem';
+const thing_config_filename = 'thingConfig.json';
+const thing_policy_filename = 'thingPolicy.json'
 // const iot_sdk_config_path = path.join(iot_sdk_credentials_dir,'config.json');
 
 function newThing() {
     const dynamoParams = {
-        TableName: constants.gatewayRegistryTableName,
-        IndexName: constants.gatewayRegistryIndexName,
+        TableName: constants.registryTableName,
+        IndexName: constants.registryIndexName,
         KeyConditionExpression: "#primaryIndex = :p",
         ExpressionAttributeNames: {
             "#primaryIndex": "type",
@@ -72,25 +73,34 @@ function newThing() {
                 console.log("createThing error:", response);
             }).send();
 
-            credentials.new({ thingName: thingName }, function (err, data) {
+            credentials.new({ thingName: thingName, thingNumber: thingNumber }, function (err, data) {
                 // Add success callback code here.
                 if (!err) {
-                    console.log("New IoMT credentials:", data);
+                    const credentials = data.credentials;
+                    const policy = data.policy;
+                    console.log("New IoMT credentials:", credentials);
                     if (!fs.existsSync(gateway_files_dir)) {
                         fs.mkdirSync(gateway_files_dir);
                         fs.mkdirSync(gateway_credentials_dir);
                     }
 
-                    fs.writeFileSync(path.join(gateway_credentials_dir, iot_sdk_credentials_filename), JSON.stringify(data));
-                    fs.writeFileSync(path.join(gateway_credentials_dir, private_key_filename), data.keyPair.PrivateKey);
-                    fs.writeFileSync(path.join(gateway_credentials_dir, public_key_filename), data.keyPair.PublicKey);
-                    fs.writeFileSync(path.join(gateway_credentials_dir, certificate_filename), data.certificatePem);
+                    fs.writeFile(path.join(gateway_credentials_dir, iot_sdk_credentials_filename), JSON.stringify(credentials), function (err) {
+                        if (err) console.log(`Error writing '${iot_sdk_credentials_filename}' to filesystem`);
+                    });
+                    fs.writeFile(path.join(gateway_credentials_dir, private_key_filename), credentials.keyPair.PrivateKey, function (err) {
+                        if (err) console.log(`Error writing '${private_key_filename}' to filesystem`);
+                    });
+                    fs.writeFile(path.join(gateway_credentials_dir, public_key_filename), credentials.keyPair.PublicKey, function (err) {
+                        if (err) console.log(`Error writing '${public_key_filename}' to filesystem`);
+                    });
+                    fs.writeFile(path.join(gateway_credentials_dir, certificate_filename), credentials.certificatePem, function (err) {
+                        if (err) console.log(`Error writing '${certificate_filename}' to filesystem`);
+                    });
                     const gateway_root_ca_path = path.join(gateway_credentials_dir, root_ca_filename);
                     if (!fs.existsSync(gateway_root_ca_path)) {
                         fs.createReadStream(path.join(iot_sdk_credentials_dir, root_ca_filename)).pipe(fs.createWriteStream(gateway_root_ca_path));
                     }
-                    const certificateId = data.certificateId;
-                    console.log("New IoMT credentials written to filesystem");
+                    const certificateId = credentials.certificateId;
 
                     //Publish JSON to Registration Topic
 
@@ -108,10 +118,17 @@ function newThing() {
                         team: constants.team,
                         study: constants.study
                     };
+                    const registrationDataString = JSON.stringify(registrationData);
+                    fs.writeFile(path.join(gateway_files_dir, thing_config_filename), registrationDataString, function (err) {
+                        if (err) console.log(`Error writing '${thing_config_filename}' to filesystem`);
+                    });
+                    fs.writeFile(path.join(gateway_files_dir, thing_policy_filename), JSON.stringify(policy), function (err) {
+                        if (err) console.log(`Error writing '${thing_policy_filename}' to filesystem`);
+                    });
 
                     const registrationParams = {
                         topic: topic,
-                        payload: JSON.stringify(registrationData),
+                        payload: registrationDataString,
                         qos: 0
                     };
 
@@ -121,29 +138,8 @@ function newThing() {
                     });
                 } else {
                     console.log("new credentials error:", err, err.stack);
-                }    
-            });
-
-
-
-            //Checking all devices were created
-
-            iot.listThings().on('success', function (response) {
-                var things = response.data.things;
-                // var myThings = [];
-                for (var i = 0; i < things.length; i++) {
-                    if (things[i].thingName === thingName) {
-                        // myThings[i] = things[i].thingName;
-                        console.log(`${things[i].thingName} is registered!`);
-                    }
                 }
-
-                // if (myThings.length = 50) {
-                //     console.log("myThing1 to 50 created and registered!");
-                // }
-            }).on('error', function (response) {
-                console.log(response);
-            }).send();
+            });
 
             console.log("Registration data on the way to Lambda and DynamoDB");
         }

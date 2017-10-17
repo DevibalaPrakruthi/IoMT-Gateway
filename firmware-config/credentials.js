@@ -1,5 +1,6 @@
 const AWS = require('aws-sdk');
 const path = require('path');
+const constants = require('./constants');
 const aws_config_path = path.join(__dirname, 'credentials', 'aws-sdk', 'awsConfig.json');
 const action_config_path = path.join(__dirname, 'credentials', 'aws-sdk', 'actionConfig.json');
 
@@ -12,7 +13,7 @@ let iot = new AWS.Iot({
 });
 let sts = new AWS.STS();
 
-function attachPolicies(thingName, credentials, callback) {
+function attachPolicies(thingName, thingNumber, credentials, callback) {
 
     //Replace it with the AWS region the lambda will be running in
     const region = action_config.region;
@@ -29,7 +30,7 @@ function attachPolicies(thingName, credentials, callback) {
     const certificateId = credentials.certificateId;
 
     //Replace it with your desired topic prefix
-    const topicName = `thing/${certificateId}`;
+    const topicName = `${constants.team}/${constants.study}/${constants.type}/${thingNumber}`;
 
     const certificateARN = credentials.certificateArn;
     // console.log(JSON.stringify(credentials));
@@ -102,22 +103,7 @@ function attachPolicies(thingName, credentials, callback) {
                     console.log("attachThingPrincipal error:", err, err.stack);
                     callback(err, data);
                 } else {
-                    /*
-                    Step 3) Activate the certificate. Optionally, you can have your custom Certificate Revocation List (CRL) check
-                    logic here and ACTIVATE the certificate only if it is not in the CRL. Revoke the certificate if it is in the CRL
-                    */
-                    iot.updateCertificate({
-                        certificateId: certificateId,
-                        newStatus: 'ACTIVE'
-                    }, (err, data) => {
-                        if (err) {
-                            console.log("update certificate error:", err, err.stack);
-                            callback(err, data);
-                        } else {
-                            console.log("certificate updated:", data);
-                            callback(null, credentials);
-                        }
-                    });
+                    callback(null, { credentials: credentials, policy: policy });
                 }    
             });
 
@@ -128,22 +114,22 @@ function attachPolicies(thingName, credentials, callback) {
 }
 
 function generateCredentials(args, callback) {
-    if (!("thingName" in args)) {
-        const err = new Error("InvalidArgumentError: Parameter 'args' must contain an index \"thingName\"");
+    if (!("thingName" in args) || !("thingNumber" in args)) {
+        const err = new Error("InvalidArgumentError: Parameter 'args' must contain indexes \"thingName\" and \"thingNumber\"");
         callback(err, {});
     }
     var params = {
         setAsActive: false
     };
     // var emitter = 
-    iot.createKeysAndCertificate(params, function (err, data) {
+    iot.createKeysAndCertificate(params, function (err, credentials) {
         if (err) {
             console.log("create keys error:", err.stack); // an error occurred
             callback(err, {});
         } else {
             // console.log("created key:", data); // successful response
             // response.credentials = data;
-            attachPolicies(args.thingName, data, function (err, policy_data) {
+            attachPolicies(args.thingName, args.thingNumber, credentials, function (err, data) {
                 if (err) {
                     console.log("attach policies error:", err.stack); // an error occurred
                     callback(err, {});
