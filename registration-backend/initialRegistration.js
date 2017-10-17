@@ -13,14 +13,14 @@ exports.handler = function (event, context) {
             "clientId": event.clientId,
             "activationCode": event.activationCode,
             "activated": event.activated,
+            "activatedBy": event.activatedBy,
             "certificateId": event.certificateId,
             "endpoint": event.endpoint,
             "thingName": event.thingName,
             "thingNumber": event.thingNumber,
             "type": event.type,
             "team": event.team,
-            "study": event.study,
-            "activatedBy": event.activatedBy
+            "study": event.study
         }
     };
 

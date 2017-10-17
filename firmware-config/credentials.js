@@ -12,7 +12,7 @@ let iot = new AWS.Iot({
 });
 let sts = new AWS.STS();
 
-function attachPolicies(credentials, callback) {
+function attachPolicies(thingName, credentials, callback) {
 
     //Replace it with the AWS region the lambda will be running in
     const region = action_config.region;
@@ -34,7 +34,7 @@ function attachPolicies(credentials, callback) {
     const certificateARN = credentials.certificateArn;
     // console.log(JSON.stringify(credentials));
     console.log("certificateARN: " + certificateARN);
-    const policyName = `Policy_${certificateId}`;
+    const policyName = `Policy_${thingName}`;
 
 
 
@@ -93,30 +93,45 @@ function attachPolicies(credentials, callback) {
                 return;
             }
             console.log("attach principle success:", data);
-            /*
-            Step 3) Activate the certificate. Optionally, you can have your custom Certificate Revocation List (CRL) check
-            logic here and ACTIVATE the certificate only if it is not in the CRL. Revoke the certificate if it is in the CRL
-            */
-            iot.updateCertificate({
-                certificateId: certificateId,
-                newStatus: 'ACTIVE'
-            }, (err, data) => {
+            const attach_thing_principle_params = {
+                principal: certificateARN,
+                thingName: thingName
+            };
+            iot.attachThingPrincipal(attach_thing_principle_params, (err, data) => {
                 if (err) {
-                    console.log("update certificate error:", err, err.stack);
+                    console.log("attachThingPrincipal error:", err, err.stack);
                     callback(err, data);
                 } else {
-                    console.log("certificate updated:", data);
-                    callback(null, credentials);
-                }
+                    /*
+                    Step 3) Activate the certificate. Optionally, you can have your custom Certificate Revocation List (CRL) check
+                    logic here and ACTIVATE the certificate only if it is not in the CRL. Revoke the certificate if it is in the CRL
+                    */
+                    iot.updateCertificate({
+                        certificateId: certificateId,
+                        newStatus: 'ACTIVE'
+                    }, (err, data) => {
+                        if (err) {
+                            console.log("update certificate error:", err, err.stack);
+                            callback(err, data);
+                        } else {
+                            console.log("certificate updated:", data);
+                            callback(null, credentials);
+                        }
+                    });
+                }    
             });
+
         });
     });
     //     }
     // });
 }
 
-function generateCredentials(callback) {
-    // var response = {};
+function generateCredentials(args, callback) {
+    if (!("thingName" in args)) {
+        const err = new Error("InvalidArgumentError: Parameter 'args' must contain an index \"thingName\"");
+        callback(err, {});
+    }
     var params = {
         setAsActive: false
     };
@@ -128,13 +143,13 @@ function generateCredentials(callback) {
         } else {
             // console.log("created key:", data); // successful response
             // response.credentials = data;
-            attachPolicies(data, function (err, policy_data) {
+            attachPolicies(args.thingName, data, function (err, policy_data) {
                 if (err) {
                     console.log("attach policies error:", err.stack); // an error occurred
                     callback(err, {});
                 } else {
                     // console.log("attached policies:", policy_data);
-                    callback(false, data);
+                    callback(null, data);
                 }
             });
         }

@@ -60,7 +60,7 @@ function newThing() {
             const serialNumber = `SN-${crypto.randomBytes(Math.ceil(12 / 2)).toString('hex').slice(0, 15).toUpperCase()}`;
             const activationCode = `AC-${crypto.randomBytes(Math.ceil(20 / 2)).toString('hex').slice(0, 20).toUpperCase()}`;
             const thingNumber = "thingNumber" in last_thing ? last_thing.thingNumber + 1 : 1;
-            const thingName = `IoMT_Gateway_${thingNumber}`;
+            const thingName = `${type}_${thingNumber}`;
             const thingParams = {
                 thingName: thingName,
                 thingTypeName: type
@@ -72,7 +72,7 @@ function newThing() {
                 console.log("createThing error:", response);
             }).send();
 
-            credentials.new(function (err, data) {
+            credentials.new({ thingName: thingName }, function (err, data) {
                 // Add success callback code here.
                 if (!err) {
                     console.log("New IoMT credentials:", data);

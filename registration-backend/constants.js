@@ -1,9 +1,9 @@
 module.exports = Object.freeze({
     team: "IoMT",
-    study: "fall-study",
+    study: "FallStudy",
     gatewayRegistryTableName: "CPSL-Thing-Registry",
     gatewayThingType: "Gateway",
     registrationTopic: "registration",
-    gatewayRegistryIndexName: "type-device-index",
-    fallStudyGatewayClientId: "gateway-1"
+    gatewayRegistryIndexName: "type-thingNumber-index",
+    fallStudyGatewayClientId: "client-1"
 });
